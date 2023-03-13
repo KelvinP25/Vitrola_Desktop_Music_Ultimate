@@ -1,14 +1,14 @@
-﻿<Window x:Class="Vitrola_Desktop_Music_Ultimate.MainWindow"
+﻿<Window x:Class="Vitrola_Desktop_Music_Ultimate.views.ListaEspera"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Vitrola_Desktop_Music_Ultimate"
+        xmlns:local="clr-namespace:Vitrola_Desktop_Music_Ultimate.views"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Height="600" Width="600" WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True" Background="{x:Null}">
     <Grid Background="{x:Null}">
-        <materialDesign:Card Margin="10" UniformCornerRadius="20" Background="{x:Null}" MouseDown="Card_MouseDown">
+        <materialDesign:Card Margin="10" UniformCornerRadius="20" Background="{x:Null}" MouseDown="Card_MouseDown" >
             <StackPanel Orientation="Vertical">
                 <StackPanel.Background>
                     <LinearGradientBrush StartPoint="0.1,0" EndPoint="0.3,1">
@@ -16,7 +16,14 @@
                         <GradientStop Color="#292929" Offset="0" />
                     </LinearGradientBrush>
                 </StackPanel.Background>
-                <ListView x:Name="songListView" Margin="10" Height="400" Foreground="White" Width="550" FontSize="14">
+                <Grid Height="70">
+                    <Button Style="{StaticResource CActionButtons}" HorizontalAlignment="Left" Margin="20 0" ToolTip="All Musics" x:Name="btnVitrola" Click="btnVitrola_Click">
+                        <StackPanel Margin="-5">
+                            <materialDesign:PackIcon Kind="ViewList" Width="20" Height="20" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+                <ListView x:Name="songListView" Margin="10" Height="400" Foreground="White" Width="550" FontSize="14" >
                     <ListView.View>
                         <GridView AllowsColumnReorder="False">
                             <GridViewColumn Header="Artista" Width="250">
@@ -59,10 +66,10 @@
                 <!---->
                 <TextBlock x:Name="musicInReproduccion" FontSize="11" Foreground="White" TextAlignment="Center" FontWeight="ExtraLight" />
 
-                <WrapPanel HorizontalAlignment="Center" Margin="0 30">
-                    <Button Style="{StaticResource CActionButtons}" HorizontalAlignment="Left" Margin="20 0" ToolTip="Open File" x:Name="btnFile" Click="btnFile_Click">
+                <WrapPanel HorizontalAlignment="Center" >
+                    <Button Style="{StaticResource CActionButtons}" HorizontalAlignment="Right" Margin="10 0" ToolTip="Agregar a Lista de Espera" x:Name="btn_Agregar" Click="btn_Agregar_Click">
                         <StackPanel Margin="-5">
-                            <materialDesign:PackIcon Kind="PlaylistAdd" Width="20" Height="20" />
+                            <materialDesign:PackIcon Kind="Add" Width="20" Height="20" />
                         </StackPanel>
                     </Button>
                 </WrapPanel>

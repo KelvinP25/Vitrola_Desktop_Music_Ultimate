@@ -10,5 +10,6 @@ namespace Vitrola_Desktop_Music_Ultimate.Controller
     public class ApiService
     {
         public IList<Vitrola> vitrola { get; set; }
+        public IList<WaitList> waitList  { get; set; }     
     }
 }

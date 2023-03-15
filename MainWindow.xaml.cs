@@ -25,15 +25,18 @@ using System.Windows.Threading;
 using System.Diagnostics;
 using System.Timers;
 using Vitrola_Desktop_Music_Ultimate.views;
-
+using System.Reflection.PortableExecutable;
+using Newtonsoft.Json;
 
 namespace Vitrola_Desktop_Music_Ultimate
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    /// 
     public partial class MainWindow : Window
     {
+
         private ObservableCollection<WaitList> _waitList = new ObservableCollection<WaitList>();
         public List<WaitList> waitLists;
 
@@ -47,7 +50,8 @@ namespace Vitrola_Desktop_Music_Ultimate
         private readonly int interval = 3000; // 3 segundos
         private System.Timers.Timer timer;
         private bool mpaso = true;
-
+        private bool mpaso1 = true;
+        private bool HaveMusic = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -70,7 +74,9 @@ namespace Vitrola_Desktop_Music_Ultimate
 
         private async void ListaEspera_Loaded(object sender, RoutedEventArgs e)
         {
+            GetVitrola();
             await RefreshWaitList();
+           
         }
         private async Task RefreshWaitList()
         {
@@ -101,10 +107,18 @@ namespace Vitrola_Desktop_Music_Ultimate
                         PlayNextSong();
                         mpaso = false;
                     }
+                    HaveMusic = false;
                 }
                 else
                 {
-                    MessageBox.Show("La respuesta de la API no tiene el formato esperado.");
+                    _waitList.Clear();
+                    if (mpaso1)
+                    {
+                        PlayRandomSong();
+                        mpaso1 = false;
+                        HaveMusic = true;
+                    }
+
                 }
             }
             else
@@ -113,7 +127,7 @@ namespace Vitrola_Desktop_Music_Ultimate
             }
         }
 
-        private async void GetVitrola(object sender, RoutedEventArgs e)
+        private async void GetVitrola()
         {
             string url = "http://127.0.0.1:8000/myapp/music/"; // URL de la API
             HttpClient client = new HttpClient();
@@ -134,6 +148,11 @@ namespace Vitrola_Desktop_Music_Ultimate
                     {
                         _vitrola.Add(vitrola); // agregar el objeto Vitrola a la lista observable
                     }
+                    if(waitLists.Count <= 0)
+                    {
+                        PlayRandomSong();
+                    }
+                    
                 }
                 else
                 {
@@ -174,7 +193,6 @@ namespace Vitrola_Desktop_Music_Ultimate
                 waveOut.PlaybackStopped += WaveOut_PlaybackStopped;
                 waveOut.Init(waveStream);
                 waveOut.Play();
-
                 // Actualizar la interfaz de usuario
                 songListView.SelectedIndex = currentTrackIndex;
                 currentTrackIndex++; // incrementar el índice para la siguiente canción
@@ -184,28 +202,26 @@ namespace Vitrola_Desktop_Music_Ultimate
                 PlayRandomSong();
             }
         }
-        private void PlayRandomSong()
+        private async void PlayRandomSong()
         {
             Random random = new Random();
-            int randomTrackIndex = random.Next(0, vitrolas.Count);
-            string randomTrack = $"http://127.0.0.1:8000/media/{vitrolas[randomTrackIndex].track}";
+            int randomTrackIndex = random.Next(0, vitrolas.Count - 1);
+            // Obtener el objeto Vitrola seleccionado del ListView
+            var selectedVitrola = _vitrola.FirstOrDefault(v => v.id == randomTrackIndex);
 
-            // Descargar el archivo de audio de la API
-            byte[] audioBytes;
-            using (WebClient webClient = new WebClient())
-            {
-                audioBytes = webClient.DownloadData(randomTrack);
-            }
-            MemoryStream audioStream = new MemoryStream(audioBytes);
+            // Crear un objeto HttpClient
+            HttpClient client = new HttpClient();
 
-            // Crear un objeto WaveStream a partir del MemoryStream
-            waveStream = new Mp3FileReader(audioStream);
+            // Crear un objeto HttpContent con los datos del objeto Vitrola seleccionado
+            var content = new StringContent(JsonConvert.SerializeObject(selectedVitrola), Encoding.UTF8, "application/json");
 
-            // Crear un objeto WaveOut para reproducir el audio
-            waveOut = new WaveOut();
-            waveOut.PlaybackStopped += WaveOut_PlaybackStopped;
-            waveOut.Init(waveStream);
-            waveOut.Play();
+            // Realizar una solicitud POST
+            var result = await client.PostAsync("http://127.0.0.1:8000/myapp/waitlist/", content);
+
+            // Leer la respuesta como una cadena
+            string responseString = await result.Content.ReadAsStringAsync();
+
+
         }
         private async Task<bool> DeleteTrack(int trackId)
         {
